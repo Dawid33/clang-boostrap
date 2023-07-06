@@ -17,7 +17,7 @@ includedir = $(prefix)/include
 libdir = $(prefix)/lib
 
 SRCS = $(sort $(wildcard src/*/*.c))
-OBJS = $(SRCS:.c=.o) src/alloca86_64-bt.o src/alloca86_64.o src/libtcc1.o src/va_list.o src/syscall.o
+OBJS = $(SRCS:.c=.o) src/alloca86_64-bt.o src/alloca86_64.o src/libtcc1.o src/va_list.o src/syscall.o 
 LOBJS = $(OBJS:.o=.lo)
 GENH = include/bits/alltypes.h
 
@@ -66,6 +66,9 @@ include/bits/alltypes.h.sh: include/bits
 
 include/bits/alltypes.h: include/bits/alltypes.h.sh
 	sh $< > $@
+
+%.o: $(ARCH)/%.s
+	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
 %.o: $(ARCH)/%.s
 	$(CC) $(CFLAGS) $(INC) -c -o $@ $<

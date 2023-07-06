@@ -2,8 +2,8 @@ TCCDIR=tcc-0.9.27
 TCC=$(TCCDIR)/tcc
 TCC0=$(TCC)0
 TCCINST=tcc-bootstrap
-all: out04 a.out $(TCCDIR)/lib/libtcc1.a
-in04: *.b ../04a/out04
+all: out04 a.out tcc
+in04: *.b ../04a/out04 
 	../04a/out04 main.b in04
 out04: in04 ../04/out03
 	../04/out03 in04 out04
@@ -28,15 +28,15 @@ $(TCCDIR)/lib/libtcc1.a: $(TCC0) $(TCCDIR)/lib/*.[cS]
 	$(TCC0) -c $(TCCDIR)/lib/libtcc1.c -o $(TCCDIR)/lib/libtcc1.o
 	$(TCC0) -ar $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/lib/*.o
 musl: tcc-files
-	$(MAKE) -C musl-0.6.0
+	$(MAKE) -j8 -C musl-0.6.0
 	$(MAKE) -C musl-0.6.0 install
 tcc-files: $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/include/*.h
 	mkdir -p $(TCCINST)/include
 	cp -r $(TCCDIR)/include/*.h $(TCCINST)/include/
 	cp -r $(TCCDIR)/lib/libtcc1.a $(TCCINST)/
-$(TCC)1: $(TCC0) $(TCCINST)/libtcc1.a
-	cd $(TCCDIR) && ./tcc0 -nostdinc -nostdlib -B ../tcc-boostrap -L../musl-bootstrap/lib -lc -I ../musl-bootstrap/include tcc.c -o tcc1
-tcc: $(TCC)1
+$(TCC): $(TCC0) musl
+	cd $(TCCDIR) && ./tcc0 -nostdinc -nostdlib -B ../tcc-boostrap -I ../musl-bootstrap/include tcc.c ../musl-bootstrap/lib/*.[oa] -o tcc
+tcc: $(TCC)
 
 $(TCC)2: $(TCC)1
 	cd $(TCCDIR) && ./tcc1 tcc.c -o tcc2
