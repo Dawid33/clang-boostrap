@@ -1,0 +1,5 @@
+**/*.o
+**/*.d
+src/liblua.a
+src/lua
+src/luac

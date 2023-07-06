@@ -2,8 +2,8 @@ TCCDIR=tcc-0.9.27
 TCC=$(TCCDIR)/tcc
 TCC0=$(TCC)0
 TCCINST=tcc-bootstrap
-all: out04 a.out tcc
-in04: *.b ../04a/out04 
+all: out04 a.out $(TCCDIR)/lib/libtcc1.a
+in04: *.b ../04a/out04
 	../04a/out04 main.b in04
 out04: in04 ../04/out03
 	../04/out03 in04 out04
