@@ -12,7 +12,7 @@ int main (void) {
 
     luaopen_lpeglabel(L);
     lua_setglobal(L, "m");
-    luaL_loadfile(L, "main.lua");
+    luaL_loadfile(L, "src/main.lua");
     error = lua_pcall(L, 0, LUA_MULTRET, 0);
     if (error) {
         fprintf(stderr, "%s", lua_tostring(L, -1));
