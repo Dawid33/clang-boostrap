@@ -28,6 +28,7 @@ command codes.
 - [stage 04](04/README.md) - a language with nice functions and local variables
 - [stage 04a](04a/README.md) - (interlude) a simple preprocessor
 - [stage 05](05/README.md) - a C compiler capable of compiling TCC
+- [stage 06](06/README.md) - an interpreter capable of executing zig
 
 ## prerequisite knowledge
 
