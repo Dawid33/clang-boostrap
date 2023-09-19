@@ -1,69 +1,69 @@
-Root <- skip container_doc_comment? ContainerMembers eof
+Root <- container_doc_comment? container_members eof
 
-ContainerMembers <- ContainerDeclarations (ContainerField COMMA)* (ContainerField / ContainerDeclarations)
+container_members <- container_declarations (container_field COMMA)* (container_field / container_declarations)
 
-ContainerDeclarations
-    <- TestDecl ContainerDeclarations
-     / TopLevelComptime ContainerDeclarations
-     / doc_comment? KEYWORD_pub? TopLevelDecl ContainerDeclarations
-     
+container_declarations
+    <- test_decl container_declarations
+     / top_level_comptime container_declarations
+     / doc_comment? KEYWORD_PUB? top_level_decl container_declarations
+     / end_of_word
 
-TestDecl <- doc_comment? KEYWORD_test STRINGLITERALSINGLE? Block
+test_decl <- doc_comment? KEYWORD_TEST block
 
-TopLevelComptime <- doc_comment? KEYWORD_comptime BlockExpr
+top_level_comptime <- doc_comment? KEYWORD_COMPTIME block_expr
 
-TopLevelDecl
-    <- (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE? / (KEYWORD_inline / KEYWORD_noinline))? FnProto (SEMICOLON / Block)
-     / (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE?)? KEYWORD_threadlocal? VarDecl
-     / KEYWORD_usingnamespace Expr SEMICOLON
+top_level_decl
+    <- (KEYWORD_EXPORT / KEYWORD_EXTERN / (KEYWORD_INLINE / KEYWORD_NOINLINE))? fn_proto (SEMICOLON / block)
+     / (KEYWORD_EXPORT / KEYWORD_EXTERN )? KEYWORD_THREADLOCAL? var_decl
+     / KEYWORD_USINGNAMESPACE expr SEMICOLON
 
-FnProto <- KEYWORD_fn IDENTIFIER? LPAREN ParamDeclList RPAREN ByteAlign? LinkSection? CallConv? EXCLAMATIONMARK? TypeExpr
+fn_proto <- KEYWORD_FN IDENTIFIER? LPAREN param_decl_list RPAREN byte_align? link_section? call_conv? EXCLAMATIONMARK? type_expr
 
-VarDecl <- (KEYWORD_const / KEYWORD_var) IDENTIFIER (COLON TypeExpr)? ByteAlign? LinkSection? (EQUAL Expr)? SEMICOLON
+var_decl <- (KEYWORD_CONST / KEYWORD_VAR) IDENTIFIER (COLON type_expr)? byte_align? link_section? (EQUAL expr)? SEMICOLON
 
-ContainerField <- doc_comment? KEYWORD_comptime? IDENTIFIER (COLON (KEYWORD_anytype / TypeExpr) ByteAlign?)? (EQUAL Expr)?
+container_field <- doc_comment? KEYWORD_COMPTIME? IDENTIFIER (COLON (KEYWORD_ANYTYPE / type_expr) byte_align?)? (EQUAL expr)?
 
-Statement
-    <- KEYWORD_comptime? VarDecl
-     / KEYWORD_comptime BlockExprStatement
-     / KEYWORD_nosuspend BlockExprStatement
-     / KEYWORD_suspend BlockExprStatement
-     / KEYWORD_defer BlockExprStatement
-     / KEYWORD_errdefer Payload? BlockExprStatement
-     / IfStatement
-     / LabeledStatement
-     / SwitchExpr
-     / AssignExpr SEMICOLON
+statement
+    <- KEYWORD_COMPTIME? var_decl
+     / KEYWORD_COMPTIME block_expr_satement
+     / KEYWORD_NOSUSPEND block_expr_satement
+     / KEYWORD_SUSPEND block_expr_satement
+     / KEYWORD_DEFER block_expr_satement
+     / KEYWORD_ERRDEFER payload? block_expr_satement
+     / if_statement
+     / labeled_statement
+     / switch_expr
+     / assign_expr SEMICOLON
 
-IfStatement
-    <- IfPrefix BlockExpr ( KEYWORD_else Payload? Statement )?
-     / IfPrefix AssignExpr ( SEMICOLON / KEYWORD_else Payload? Statement )
+if_statement
+    <- if_prefix block_expr ( KEYWORD_ELSE payload? statement )?
+     / if_prefix assign_expr ( SEMICOLON / KEYWORD_ELSE payload? statement )
 
-LabeledStatement <- BlockLabel? (Block / LoopStatement)
+labeled_statement <- block_label? (block / loop_statement)
 
-LoopStatement <- KEYWORD_inline? (ForStatement / WhileStatement)
+loop_statement <- KEYWORD_INLINE? (for_statement / while_statement)
 
-ForStatement
-    <- ForPrefix BlockExpr ( KEYWORD_else Statement )?
-     / ForPrefix AssignExpr ( SEMICOLON / KEYWORD_else Statement )
+for_statement
+    <- for_prefix block_expr ( KEYWORD_ELSE statement )?
+     / for_prefix assign_expr ( SEMICOLON / KEYWORD_ELSE statement )
 
-WhileStatement
-    <- WhilePrefix BlockExpr ( KEYWORD_else Payload? Statement )?
-     / WhilePrefix AssignExpr ( SEMICOLON / KEYWORD_else Payload? Statement )
+while_statement
+    <- WhilePrefix block_expr ( KEYWORD_ELSE payload? statement )?
+     / WhilePrefix assign_expr ( SEMICOLON / KEYWORD_ELSE payload? statement )
 
-BlockExprStatement
-    <- BlockExpr
-     / AssignExpr SEMICOLON
+block_expr_satement
+    <- block_expr
+     / assign_expr SEMICOLON
 
-BlockExpr <- BlockLabel? Block
+block_expr <- block_label? block
 
-AssignExpr <- Expr (AssignOp Expr)?
+assign_expr <- expr (AssignOp expr)?
 
-Expr <- BoolOrExpr
+expr <- bool_or_expr
 
-BoolOrExpr <- BoolAndExpr (KEYWORD_or BoolAndExpr)*
+bool_or_expr <- BoolAndExpr (KEYWORD_OR BoolAndExpr)*
 
-BoolAndExpr <- CompareExpr (KEYWORD_and CompareExpr)*
+BoolAndExpr <- CompareExpr (KEYWORD_AND CompareExpr)*
 
 CompareExpr <- BitwiseExpr (CompareOp BitwiseExpr)?
 
@@ -80,39 +80,39 @@ PrefixExpr <- PrefixOp* PrimaryExpr
 PrimaryExpr
     <- AsmExpr
      / IfExpr
-     / KEYWORD_break BreakLabel? Expr?
-     / KEYWORD_comptime Expr
-     / KEYWORD_nosuspend Expr
-     / KEYWORD_continue BreakLabel?
-     / KEYWORD_resume Expr
-     / KEYWORD_return Expr?
-     / BlockLabel? LoopExpr
-     / Block
+     / KEYWORD_BREAK BreakLabel? expr?
+     / KEYWORD_COMPTIME expr
+     / KEYWORD_NOSUSPEND expr
+     / KEYWORD_CONTINUE BreakLabel?
+     / KEYWORD_RESUME expr
+     / KEYWORD_RETURN expr?
+     / block_label? LoopExpr
+     / block
      / CurlySuffixExpr
 
-IfExpr <- IfPrefix Expr (KEYWORD_else Payload? Expr)?
+IfExpr <- if_prefix expr (KEYWORD_ELSE payload? expr)?
 
-Block <- LBRACE Statement* RBRACE
+block <- LBRACE statement* RBRACE
 
-LoopExpr <- KEYWORD_inline? (ForExpr / WhileExpr)
+LoopExpr <- KEYWORD_INLINE? (ForExpr / WhileExpr)
 
-ForExpr <- ForPrefix Expr (KEYWORD_else Expr)?
+ForExpr <- for_prefix expr (KEYWORD_ELSE expr)?
 
-WhileExpr <- WhilePrefix Expr (KEYWORD_else Payload? Expr)?
+WhileExpr <- WhilePrefix expr (KEYWORD_ELSE payload? expr)?
 
-CurlySuffixExpr <- TypeExpr InitList?
+CurlySuffixExpr <- type_expr InitList?
 
 InitList
     <- LBRACE FieldInit (COMMA FieldInit)* COMMA? RBRACE
-     / LBRACE Expr (COMMA Expr)* COMMA? RBRACE
+     / LBRACE expr (COMMA expr)* COMMA? RBRACE
      / LBRACE RBRACE
 
-TypeExpr <- PrefixTypeOp* ErrorUnionExpr
+type_expr <- PrefixTypeOp* ErrorUnionExpr
 
-ErrorUnionExpr <- SuffixExpr (EXCLAMATIONMARK TypeExpr)?
+ErrorUnionExpr <- SuffixExpr (EXCLAMATIONMARK type_expr)?
 
 SuffixExpr
-    <- KEYWORD_async PrimaryTypeExpr SuffixOp* FnCallArguments
+    <- KEYWORD_ASYNC PrimaryTypeExpr SuffixOp* FnCallArguments
      / PrimaryTypeExpr (SuffixOp / FnCallArguments)*
 
 PrimaryTypeExpr
@@ -123,91 +123,91 @@ PrimaryTypeExpr
      / DOT InitList
      / ErrorSetDecl
      / FLOAT
-     / FnProto
+     / fn_proto
      / GroupedExpr
      / LabeledTypeExpr
      / IDENTIFIER
      / IfTypeExpr
      / INTEGER
-     / KEYWORD_comptime TypeExpr
-     / KEYWORD_error DOT IDENTIFIER
-     / KEYWORD_anyframe
-     / KEYWORD_unreachable
+     / KEYWORD_COMPTIME type_expr
+     / KEYWORD_ERROR DOT IDENTIFIER
+     / KEYWORD_ANYFRAME
+     / KEYWORD_UNREACHABLE
      / STRINGLITERAL
-     / SwitchExpr
+     / switch_expr
 
-ContainerDecl <- (KEYWORD_extern / KEYWORD_packed)? ContainerDeclAuto
+ContainerDecl <- (KEYWORD_EXTERN / KEYWORD_PACKED)? ContainerDeclAuto
 
-ErrorSetDecl <- KEYWORD_error LBRACE IdentifierList RBRACE
+ErrorSetDecl <- KEYWORD_ERROR LBRACE IdentifierList RBRACE
 
-GroupedExpr <- LPAREN Expr RPAREN
+GroupedExpr <- LPAREN expr RPAREN
 
-IfTypeExpr <- IfPrefix TypeExpr (KEYWORD_else Payload? TypeExpr)?
+IfTypeExpr <- if_prefix type_expr (KEYWORD_ELSE payload? type_expr)?
 
 LabeledTypeExpr
-    <- BlockLabel Block
-     / BlockLabel? LoopTypeExpr
+    <- block_label block
+     / block_label? LoopTypeExpr
 
-LoopTypeExpr <- KEYWORD_inline? (ForTypeExpr / WhileTypeExpr)
+LoopTypeExpr <- KEYWORD_INLINE? (ForTypeExpr / WhileTypeExpr)
 
-ForTypeExpr <- ForPrefix TypeExpr (KEYWORD_else TypeExpr)?
+ForTypeExpr <- for_prefix type_expr (KEYWORD_ELSE type_expr)?
 
-WhileTypeExpr <- WhilePrefix TypeExpr (KEYWORD_else Payload? TypeExpr)?
+WhileTypeExpr <- WhilePrefix type_expr (KEYWORD_ELSE payload? type_expr)?
 
-SwitchExpr <- KEYWORD_switch LPAREN Expr RPAREN LBRACE SwitchProngList RBRACE
+switch_expr <- KEYWORD_SWITCH LPAREN expr RPAREN LBRACE switch_prong_list RBRACE
 
-AsmExpr <- KEYWORD_asm KEYWORD_volatile? LPAREN Expr AsmOutput? RPAREN
+AsmExpr <- KEYWORD_ASM KEYWORD_VOLATILE? LPAREN expr AsmOutput? RPAREN
 
 AsmOutput <- COLON AsmOutputList AsmInput?
 
-AsmOutputItem <- LBRACKET IDENTIFIER RBRACKET STRINGLITERAL LPAREN (MINUSRARROW TypeExpr / IDENTIFIER) RPAREN
+AsmOutputItem <- LBRACKET IDENTIFIER RBRACKET STRINGLITERAL LPAREN (MINUSRARROW type_expr / IDENTIFIER) RPAREN
 
 AsmInput <- COLON AsmInputList AsmClobbers?
 
-AsmInputItem <- LBRACKET IDENTIFIER RBRACKET STRINGLITERAL LPAREN Expr RPAREN
+AsmInputItem <- LBRACKET IDENTIFIER RBRACKET STRINGLITERAL LPAREN expr RPAREN
 
 AsmClobbers <- COLON StringList
 
 BreakLabel <- COLON IDENTIFIER
 
-BlockLabel <- IDENTIFIER COLON
+block_label <- IDENTIFIER COLON
 
-FieldInit <- DOT IDENTIFIER EQUAL Expr
+FieldInit <- DOT IDENTIFIER EQUAL expr
 
-WhileContinueExpr <- COLON LPAREN AssignExpr RPAREN
+while_continue_expr <- COLON LPAREN assign_expr RPAREN
 
-LinkSection <- KEYWORD_linksection LPAREN Expr RPAREN
+link_section <- KEYWORD_LINKSECTION LPAREN expr RPAREN
 
-CallConv <- KEYWORD_callconv LPAREN Expr RPAREN
+call_conv <- KEYWORD_CALLCONV LPAREN expr RPAREN
 
-ParamDecl
-    <- doc_comment? (KEYWORD_noalias / KEYWORD_comptime)? (IDENTIFIER COLON)? ParamType
+param_decl
+    <- doc_comment? (KEYWORD_NOALIAS / KEYWORD_COMPTIME)? (IDENTIFIER COLON)? param_type
      / DOT3
 
-ParamType
-    <- KEYWORD_anytype
-     / TypeExpr
+param_type
+    <- KEYWORD_ANYTYPE
+     / type_expr
 
-IfPrefix <- KEYWORD_if LPAREN Expr RPAREN PtrPayload?
+if_prefix <- KEYWORD_IF LPAREN expr RPAREN PtrPayload?
 
-WhilePrefix <- KEYWORD_while LPAREN Expr RPAREN PtrPayload? WhileContinueExpr?
+WhilePrefix <- KEYWORD_WHILE LPAREN expr RPAREN PtrPayload? while_continue_expr?
 
-ForPrefix <- KEYWORD_for LPAREN Expr RPAREN PtrIndexPayload
+for_prefix <- KEYWORD_FOR LPAREN expr RPAREN ptr_index_payload
 
-Payload <- PIPE IDENTIFIER PIPE
+payload <- PIPE IDENTIFIER PIPE
 
 PtrPayload <- PIPE ASTERISK? IDENTIFIER PIPE
 
-PtrIndexPayload <- PIPE ASTERISK? IDENTIFIER (COMMA IDENTIFIER)? PIPE
+ptr_index_payload <- PIPE ASTERISK? IDENTIFIER (COMMA IDENTIFIER)? PIPE
 
 
-SwitchProng <- SwitchCase EQUALRARROW PtrPayload? AssignExpr
+SwitchProng <- SwitchCase EQUALRARROW PtrPayload? assign_expr
 
 SwitchCase
     <- SwitchItem (COMMA SwitchItem)* COMMA?
-     / KEYWORD_else
+     / KEYWORD_ELSE
 
-SwitchItem <- Expr (DOT3 Expr)?
+SwitchItem <- expr (DOT3 expr)?
 
 AssignOp
     <- ASTERISKEQUAL
@@ -237,8 +237,8 @@ BitwiseOp
     <- AMPERSAND
      / CARET
      / PIPE
-     / KEYWORD_orelse
-     / KEYWORD_catch Payload?
+     / KEYWORD_ORELSE
+     / KEYWORD_CATCH payload?
 
 BitShiftOp
     <- LARROW2
@@ -265,46 +265,46 @@ PrefixOp
      / TILDE
      / MINUSPERCENT
      / AMPERSAND
-     / KEYWORD_try
-     / KEYWORD_await
+     / KEYWORD_TRY
+     / KEYWORD_AWAIT
 
 PrefixTypeOp
     <- QUESTIONMARK
-     / KEYWORD_anyframe MINUSRARROW
-     / SliceTypeStart (ByteAlign / KEYWORD_const / KEYWORD_volatile / KEYWORD_allowzero)*
-     / PtrTypeStart (KEYWORD_align LPAREN Expr (COLON INTEGER COLON INTEGER)? RPAREN / KEYWORD_const / KEYWORD_volatile / KEYWORD_allowzero)*
+     / KEYWORD_ANYFRAME MINUSRARROW
+     / SliceTypeStart (byte_align / KEYWORD_CONST / KEYWORD_VOLATILE / KEYWORD_ALLOWZERO)*
+     / PtrTypeStart (KEYWORD_ALIGN LPAREN expr (COLON INTEGER COLON INTEGER)? RPAREN / KEYWORD_CONST / KEYWORD_VOLATILE / KEYWORD_ALLOWZERO)*
      / ArrayTypeStart
 
 SuffixOp
-    <- LBRACKET Expr (DOT2 (Expr? (COLON Expr)?)?)? RBRACKET
+    <- LBRACKET expr (DOT2 (expr? (COLON expr)?)?)? RBRACKET
      / DOT IDENTIFIER
      / DOTASTERISK
      / DOTQUESTIONMARK
 
-FnCallArguments <- LPAREN ExprList RPAREN
+FnCallArguments <- LPAREN expr_list RPAREN
 
-SliceTypeStart <- LBRACKET (COLON Expr)? RBRACKET
+SliceTypeStart <- LBRACKET (COLON expr)? RBRACKET
 
 PtrTypeStart
     <- ASTERISK
      / ASTERISK2
-     / LBRACKET ASTERISK (LETTERC / COLON Expr)? RBRACKET
+     / LBRACKET ASTERISK (LETTERC / COLON expr)? RBRACKET
 
-ArrayTypeStart <- LBRACKET Expr (COLON Expr)? RBRACKET
+ArrayTypeStart <- LBRACKET expr (COLON expr)? RBRACKET
 
-ContainerDeclAuto <- ContainerDeclType LBRACE container_doc_comment? ContainerMembers RBRACE
+ContainerDeclAuto <- ContainerDeclType LBRACE container_doc_comment? container_members RBRACE
 
 ContainerDeclType
-    <- KEYWORD_struct
-     / KEYWORD_opaque
-     / KEYWORD_enum (LPAREN Expr RPAREN)?
-     / KEYWORD_union (LPAREN (KEYWORD_enum (LPAREN Expr RPAREN)? / Expr) RPAREN)?
+    <- KEYWORD_STRUCT
+     / KEYWORD_OPAQUE
+     / KEYWORD_ENUM (LPAREN expr RPAREN)?
+     / KEYWORD_UNION (LPAREN (KEYWORD_ENUM (LPAREN expr RPAREN)? / expr) RPAREN)?
 
-ByteAlign <- KEYWORD_align LPAREN Expr RPAREN
+byte_align <- KEYWORD_ALIGN LPAREN expr RPAREN
 
 IdentifierList <- (doc_comment? IDENTIFIER COMMA)* (doc_comment? IDENTIFIER)?
 
-SwitchProngList <- (SwitchProng COMMA)* SwitchProng?
+switch_prong_list <- (SwitchProng COMMA)* SwitchProng?
 
 AsmOutputList <- (AsmOutputItem COMMA)* AsmOutputItem?
 
@@ -312,9 +312,9 @@ AsmInputList <- (AsmInputItem COMMA)* AsmInputItem?
 
 StringList <- (STRINGLITERAL COMMA)* STRINGLITERAL?
 
-ParamDeclList <- (ParamDecl COMMA)* ParamDecl?
+param_decl_list <- (param_decl COMMA)* param_decl?
 
-ExprList <- (Expr COMMA)* Expr?
+expr_list <- (expr COMMA)* expr?
 
 eof <- !.
 bin <- [01]
@@ -374,145 +374,143 @@ container_doc_comment <- ('//!' [^\n]* [ \n]*)+
 doc_comment <- ('///' [^\n]* [ \n]*)+
 line_comment <- '//' ![!/][^\n]* / '////' [^\n]*
 line_string <- ("\\\\" [^\n]* [ \n]*)+
-skip <- ([ \n] / line_comment)*
 
-CHAR_LITERAL <- "'" char_char "'" skip
+CHAR_LITERAL <- "'" char_char "'" 
 FLOAT
-    <- "0x" hex_int "." hex_int ([pP] [-+]? dec_int)? skip
-     /      dec_int "." dec_int ([eE] [-+]? dec_int)? skip
-     / "0x" hex_int [pP] [-+]? dec_int skip
-     /      dec_int [eE] [-+]? dec_int skip
+    <- "0x" hex_int "." hex_int ([pP] [-+]? dec_int)? 
+     /      dec_int "." dec_int ([eE] [-+]? dec_int)? 
+     / "0x" hex_int [pP] [-+]? dec_int 
+     /      dec_int [eE] [-+]? dec_int 
 INTEGER
-    <- "0b" bin_int skip
-     / "0o" oct_int skip
-     / "0x" hex_int skip
-     /      dec_int   skip
-STRINGLITERALSINGLE <- "\"" string_char* "\"" skip
+    <- "0b" bin_int 
+     / "0o" oct_int 
+     / "0x" hex_int 
+     /      dec_int   
+STRINGLITERALSINGLE <- '"' string_char* '"'
 STRINGLITERAL
     <- STRINGLITERALSINGLE
-     / (line_string                 skip)+
+     / (line_string)+
 IDENTIFIER
-    <- !keyword [A-Za-z_] [A-Za-z0-9_]* skip
-     / "@\"" string_char* "\""                            skip
-BUILTINIDENTIFIER <- "@"[A-Za-z_][A-Za-z0-9_]* skip
+    <- !KEYWORD [A-Za-z_] [A-Za-z0-9_]* 
+BUILTINIDENTIFIER <- "@"[A-Za-z_][A-Za-z0-9_]* 
 
 
-AMPERSAND            <- '&'      ![=]      skip
-AMPERSANDEQUAL       <- '&='               skip
-ASTERISK             <- '*'      ![*%=]    skip
-ASTERISK2            <- '**'               skip
-ASTERISKEQUAL        <- '*='               skip
-ASTERISKPERCENT      <- '*%'     ![=]      skip
-ASTERISKPERCENTEQUAL <- '*%='              skip
-CARET                <- '^'      ![=]      skip
-CARETEQUAL           <- '^='               skip
-COLON                <- ':'                skip
-COMMA                <- ','                skip
-DOT                  <- '.'      ![*.?]    skip
-DOT2                 <- '..'     ![.]      skip
-DOT3                 <- '...'              skip
-DOTASTERISK          <- '.*'               skip
-DOTQUESTIONMARK      <- '.?'               skip
-EQUAL                <- '='      ![>=]     skip
-EQUALEQUAL           <- '=='               skip
-EQUALRARROW          <- '=>'               skip
-EXCLAMATIONMARK      <- '!'      ![=]      skip
-EXCLAMATIONMARKEQUAL <- '!='               skip
-LARROW               <- '<'      ![<=]     skip
-LARROW2              <- '<<'     ![=]      skip
-LARROW2EQUAL         <- '<<='              skip
-LARROWEQUAL          <- '<='               skip
-LBRACE               <- '{'                skip
-LBRACKET             <- '['                skip
-LPAREN               <- '('                skip
-MINUS                <- '-'      ![%=>]    skip
-MINUSEQUAL           <- '-='               skip
-MINUSPERCENT         <- '-%'     ![=]      skip
-MINUSPERCENTEQUAL    <- '-%='              skip
-MINUSRARROW          <- '->'               skip
-PERCENT              <- '%'      ![=]      skip
-PERCENTEQUAL         <- '%='               skip
-PIPE                 <- '|'      ![|=]     skip
-PIPE2                <- '||'               skip
-PIPEEQUAL            <- '|='               skip
-PLUS                 <- '+'      ![%+=]    skip
-PLUS2                <- '++'               skip
-PLUSEQUAL            <- '+='               skip
-PLUSPERCENT          <- '+%'     ![=]      skip
-PLUSPERCENTEQUAL     <- '+%='              skip
-LETTERC              <- 'c'                skip
-QUESTIONMARK         <- '?'                skip
-RARROW               <- '>'      ![>=]     skip
-RARROW2              <- '>>'     ![=]      skip
-RARROW2EQUAL         <- '>>='              skip
-RARROWEQUAL          <- '>='               skip
-RBRACE               <- '}'                skip
-RBRACKET             <- ']'                skip
-RPAREN               <- ')'                skip
-SEMICOLON            <- ';'                skip
-SLASH                <- '/'      ![=]      skip
-SLASHEQUAL           <- '/='               skip
-TILDE                <- '~'                skip
+AMPERSAND            <- '&'      ![=]      
+AMPERSANDEQUAL       <- '&='               
+ASTERISK             <- '*'      ![*%=]    
+ASTERISK2            <- '**'               
+ASTERISKEQUAL        <- '*='               
+ASTERISKPERCENT      <- '*%'     ![=]      
+ASTERISKPERCENTEQUAL <- '*%='              
+CARET                <- '^'      ![=]      
+CARETEQUAL           <- '^='               
+COLON                <- ':'                
+COMMA                <- ','                
+DOT                  <- '.'      ![*.?]    
+DOT2                 <- '..'     ![.]      
+DOT3                 <- '...'              
+DOTASTERISK          <- '.*'               
+DOTQUESTIONMARK      <- '.?'               
+EQUAL                <- '='      ![>=]     
+EQUALEQUAL           <- '=='               
+EQUALRARROW          <- '=>'               
+EXCLAMATIONMARK      <- '!'      ![=]      
+EXCLAMATIONMARKEQUAL <- '!='               
+LARROW               <- '<'      ![<=]     
+LARROW2              <- '<<'     ![=]      
+LARROW2EQUAL         <- '<<='              
+LARROWEQUAL          <- '<='               
+LBRACE               <- '{'                
+LBRACKET             <- '['                
+LPAREN               <- '('                
+MINUS                <- '-'      ![%=>]    
+MINUSEQUAL           <- '-='               
+MINUSPERCENT         <- '-%'     ![=]      
+MINUSPERCENTEQUAL    <- '-%='              
+MINUSRARROW          <- '->'               
+PERCENT              <- '%'      ![=]      
+PERCENTEQUAL         <- '%='               
+PIPE                 <- '|'      ![|=]     
+PIPE2                <- '||'               
+PIPEEQUAL            <- '|='               
+PLUS                 <- '+'      ![%+=]    
+PLUS2                <- '++'               
+PLUSEQUAL            <- '+='               
+PLUSPERCENT          <- '+%'     ![=]      
+PLUSPERCENTEQUAL     <- '+%='              
+LETTERC              <- 'c'                
+QUESTIONMARK         <- '?'                
+RARROW               <- '>'      ![>=]     
+RARROW2              <- '>>'     ![=]      
+RARROW2EQUAL         <- '>>='              
+RARROWEQUAL          <- '>='               
+RBRACE               <- '}'                
+RBRACKET             <- ']'                
+RPAREN               <- ')'                
+SEMICOLON            <- ';'                
+SLASH                <- '/'      ![=]      
+SLASHEQUAL           <- '/='               
+TILDE                <- '~'                
 
-end_of_word <- ![a-zA-Z0-9_] skip
-KEYWORD_align       <- 'align'       end_of_word
-KEYWORD_allowzero   <- 'allowzero'   end_of_word
-KEYWORD_and         <- 'and'         end_of_word
-KEYWORD_anyframe    <- 'anyframe'    end_of_word
-KEYWORD_anytype     <- 'anytype'     end_of_word
-KEYWORD_asm         <- 'asm'         end_of_word
-KEYWORD_async       <- 'async'       end_of_word
-KEYWORD_await       <- 'await'       end_of_word
-KEYWORD_break       <- 'break'       end_of_word
-KEYWORD_callconv    <- 'callconv'    end_of_word
-KEYWORD_catch       <- 'catch'       end_of_word
-KEYWORD_comptime    <- 'comptime'    end_of_word
-KEYWORD_const       <- 'const'       end_of_word
-KEYWORD_continue    <- 'continue'    end_of_word
-KEYWORD_defer       <- 'defer'       end_of_word
-KEYWORD_else        <- 'else'        end_of_word
-KEYWORD_enum        <- 'enum'        end_of_word
-KEYWORD_errdefer    <- 'errdefer'    end_of_word
-KEYWORD_error       <- 'error'       end_of_word
-KEYWORD_export      <- 'export'      end_of_word
-KEYWORD_extern      <- 'extern'      end_of_word
-KEYWORD_fn          <- 'fn'          end_of_word
-KEYWORD_for         <- 'for'         end_of_word
-KEYWORD_if          <- 'if'          end_of_word
-KEYWORD_inline      <- 'inline'      end_of_word
-KEYWORD_noalias     <- 'noalias'     end_of_word
-KEYWORD_nosuspend   <- 'nosuspend'   end_of_word
-KEYWORD_noinline    <- 'noinline'    end_of_word
-KEYWORD_opaque      <- 'opaque'      end_of_word
-KEYWORD_or          <- 'or'          end_of_word
-KEYWORD_orelse      <- 'orelse'      end_of_word
-KEYWORD_packed      <- 'packed'      end_of_word
-KEYWORD_pub         <- 'pub'         end_of_word
-KEYWORD_resume      <- 'resume'      end_of_word
-KEYWORD_return      <- 'return'      end_of_word
-KEYWORD_linksection <- 'linksection' end_of_word
-KEYWORD_struct      <- 'struct'      end_of_word
-KEYWORD_suspend     <- 'suspend'     end_of_word
-KEYWORD_switch      <- 'switch'      end_of_word
-KEYWORD_test        <- 'test'        end_of_word
-KEYWORD_threadlocal <- 'threadlocal' end_of_word
-KEYWORD_try         <- 'try'         end_of_word
-KEYWORD_union       <- 'union'       end_of_word
-KEYWORD_unreachable <- 'unreachable' end_of_word
-KEYWORD_usingnamespace <- 'usingnamespace' end_of_word
-KEYWORD_var         <- 'var'         end_of_word
-KEYWORD_volatile    <- 'volatile'    end_of_word
-KEYWORD_while       <- 'while'       end_of_word
+fragment end_of_word <- ![a-zA-Z0-9_] 
+KEYWORD_ALIGN       <- 'align'       end_of_word
+KEYWORD_ALLOWZERO   <- 'allowzero'   end_of_word
+KEYWORD_AND         <- 'and'         end_of_word
+KEYWORD_ANYFRAME    <- 'anyframe'    end_of_word
+KEYWORD_ANYTYPE     <- 'anytype'     end_of_word
+KEYWORD_ASM         <- 'asm'         end_of_word
+KEYWORD_ASYNC       <- 'async'       end_of_word
+KEYWORD_AWAIT       <- 'await'       end_of_word
+KEYWORD_BREAK       <- 'break'       end_of_word
+KEYWORD_CALLCONV    <- 'callconv'    end_of_word
+KEYWORD_CATCH       <- 'catch'       end_of_word
+KEYWORD_COMPTIME    <- 'comptime'    end_of_word
+KEYWORD_CONST       <- 'const'       end_of_word
+KEYWORD_CONTINUE    <- 'continue'    end_of_word
+KEYWORD_DEFER       <- 'defer'       end_of_word
+KEYWORD_ELSE        <- 'else'        end_of_word
+KEYWORD_ENUM        <- 'enum'        end_of_word
+KEYWORD_ERRDEFER    <- 'errdefer'    end_of_word
+KEYWORD_ERROR       <- 'error'       end_of_word
+KEYWORD_EXPORT      <- 'export'      end_of_word
+KEYWORD_EXTERN      <- 'extern'      end_of_word
+KEYWORD_FN          <- 'fn'          end_of_word
+KEYWORD_FOR         <- 'for'         end_of_word
+KEYWORD_IF          <- 'if'          end_of_word
+KEYWORD_INLINE      <- 'inline'      end_of_word
+KEYWORD_NOALIAS     <- 'noalias'     end_of_word
+KEYWORD_NOSUSPEND   <- 'nosuspend'   end_of_word
+KEYWORD_NOINLINE    <- 'noinline'    end_of_word
+KEYWORD_OPAQUE      <- 'opaque'      end_of_word
+KEYWORD_OR          <- 'or'          end_of_word
+KEYWORD_ORELSE      <- 'orelse'      end_of_word
+KEYWORD_PACKED      <- 'packed'      end_of_word
+KEYWORD_PUB         <- 'pub'         end_of_word
+KEYWORD_RESUME      <- 'resume'      end_of_word
+KEYWORD_RETURN      <- 'return'      end_of_word
+KEYWORD_LINKSECTION <- 'linksection' end_of_word
+KEYWORD_STRUCT      <- 'struct'      end_of_word
+KEYWORD_SUSPEND     <- 'suspend'     end_of_word
+KEYWORD_SWITCH      <- 'switch'      end_of_word
+KEYWORD_TEST        <- 'test'        end_of_word
+KEYWORD_THREADLOCAL <- 'threadlocal' end_of_word
+KEYWORD_TRY         <- 'try'         end_of_word
+KEYWORD_UNION       <- 'union'       end_of_word
+KEYWORD_UNREACHABLE <- 'unreachable' end_of_word
+KEYWORD_USINGNAMESPACE <- 'usingnamespace' end_of_word
+KEYWORD_VAR         <- 'var'         end_of_word
+KEYWORD_VOLATILE    <- 'volatile'    end_of_word
+KEYWORD_WHILE       <- 'while'       end_of_word
 
-keyword <- KEYWORD_align / KEYWORD_allowzero / KEYWORD_and / KEYWORD_anyframe
-         / KEYWORD_anytype / KEYWORD_asm / KEYWORD_async / KEYWORD_await
-         / KEYWORD_break / KEYWORD_callconv / KEYWORD_catch / KEYWORD_comptime
-         / KEYWORD_const / KEYWORD_continue / KEYWORD_defer / KEYWORD_else
-         / KEYWORD_enum / KEYWORD_errdefer / KEYWORD_error / KEYWORD_export
-         / KEYWORD_extern / KEYWORD_fn / KEYWORD_for / KEYWORD_if
-         / KEYWORD_inline / KEYWORD_noalias / KEYWORD_nosuspend / KEYWORD_noinline
-         / KEYWORD_opaque / KEYWORD_or / KEYWORD_orelse / KEYWORD_packed
-         / KEYWORD_pub / KEYWORD_resume / KEYWORD_return / KEYWORD_linksection
-         / KEYWORD_struct / KEYWORD_suspend / KEYWORD_switch / KEYWORD_test
-         / KEYWORD_threadlocal / KEYWORD_try / KEYWORD_union / KEYWORD_unreachable
-         / KEYWORD_usingnamespace / KEYWORD_var / KEYWORD_volatile / KEYWORD_while
+KEYWORD <- KEYWORD_ALIGN / KEYWORD_ALLOWZERO / KEYWORD_AND / KEYWORD_ANYFRAME
+         / KEYWORD_ANYTYPE / KEYWORD_ASM / KEYWORD_ASYNC / KEYWORD_AWAIT
+         / KEYWORD_BREAK / KEYWORD_CALLCONV / KEYWORD_CATCH / KEYWORD_COMPTIME
+         / KEYWORD_CONST / KEYWORD_CONTINUE / KEYWORD_DEFER / KEYWORD_ELSE
+         / KEYWORD_ENUM / KEYWORD_ERRDEFER / KEYWORD_ERROR / KEYWORD_EXPORT
+         / KEYWORD_EXTERN / KEYWORD_FN / KEYWORD_FOR / KEYWORD_IF
+         / KEYWORD_INLINE / KEYWORD_NOALIAS / KEYWORD_NOSUSPEND / KEYWORD_NOINLINE
+         / KEYWORD_OPAQUE / KEYWORD_OR / KEYWORD_ORELSE / KEYWORD_PACKED
+         / KEYWORD_PUB / KEYWORD_RESUME / KEYWORD_RETURN / KEYWORD_LINKSECTION
+         / KEYWORD_STRUCT / KEYWORD_SUSPEND / KEYWORD_SWITCH / KEYWORD_TEST
+         / KEYWORD_THREADLOCAL / KEYWORD_TRY / KEYWORD_UNION / KEYWORD_UNREACHABLE
+         / KEYWORD_USINGNAMESPACE / KEYWORD_VAR / KEYWORD_VOLATILE / KEYWORD_WHILE

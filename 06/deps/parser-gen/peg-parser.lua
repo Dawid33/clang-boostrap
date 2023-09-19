@@ -1,4 +1,5 @@
 local re = require("deps.lpeglabel.relabel")
+local util = require("src.util")
 
 local peg = {}
 
@@ -256,6 +257,7 @@ function peg.pegToAST(input, defs)
 		table.insert(err, string.rep(" ", col-1) .. "^")
 		error("syntax error(s) in pattern\n" .. table.concat(err, "\n"), 3)
 	end
+
 	return r
 end
 
