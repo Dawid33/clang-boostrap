@@ -1,4 +1,4 @@
-local re = require "lpeglabel.relabel"
+local re = require("deps.lpeglabel.relabel")
 
 local peg = {}
 

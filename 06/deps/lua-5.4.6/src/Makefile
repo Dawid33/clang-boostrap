@@ -6,12 +6,12 @@
 # Your platform. See PLATS for possible values.
 PLAT= linux
 
-CC= ../../../05/tcc-0.9.27/tcc
-CFLAGS= -nostdinc -B ../../../05/tcc-boostrap -I ../../../05/musl-bootstrap/include $(SYSCFLAGS) $(MYCFLAGS)
+CC= ../../../../05/tcc-0.9.27/tcc
+CFLAGS= -nostdinc -B ../../../../05/tcc-boostrap -I ../../../../05/musl-bootstrap/include $(SYSCFLAGS) $(MYCFLAGS)
 LDFLAGS= -nostdlib $(SYSLDFLAGS) $(MYLDFLAGS)
 LIBS= $(SYSLIBS) $(MYLIBS)
 
-AR= ../../../05/tcc-0.9.27/tcc -ar rc
+AR= ../../../../05/tcc-0.9.27/tcc -ar rc
 RANLIB= ranlib
 RM= rm -f
 UNAME= uname
@@ -61,10 +61,10 @@ $(LUA_A): $(BASE_O)
 	$(RANLIB) $@
 
 $(LUA_T): $(LUA_O) $(LUA_A)
-	$(CC) -o $@ $(LDFLAGS) $(LUA_O) $(LUA_A) $(LIBS) ../../../05/musl-bootstrap/lib/*.[oa] 
+	$(CC) -o $@ $(LDFLAGS) $(LUA_O) $(LUA_A) $(LIBS) ../../../../05/musl-bootstrap/lib/*.[oa] 
 
 $(LUAC_T): $(LUAC_O) $(LUA_A)
-	$(CC) -o $@ $(LDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS) ../../../05/musl-bootstrap/lib/*.[oa]
+	$(CC) -o $@ $(LDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS) ../../../../05/musl-bootstrap/lib/*.[oa]
 
 test:
 	./$(LUA_T) -v

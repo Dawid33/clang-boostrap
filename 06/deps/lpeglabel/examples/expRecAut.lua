@@ -1,31 +1,30 @@
-local m = require"lpeglabel"
-local re = require"relabel"
+local m = require "lpeglabel"
+local re = require "relabel"
 
-local labels = {
-  {"ExpTermFirst",  "expected an expression"},
-  {"ExpTermOp",   "expected a term after the operator"},
-  {"MisClose",  "missing a closing ')' after the expression"},
-}
+local num = m.R("09")^1 / tonumber
+local op = m.S("+-")
 
-local function labelindex(labname)
-  for i, elem in ipairs(labels) do
-    if elem[1] == labname then
-      return i
-    end
-  end
-  error("could not find label: " .. labname)
+local labels = {}
+local nlabels = 0
+
+local function newError(lab, msg, psync, pcap)
+	nlabels = nlabels + 1
+	psync = psync or m.P(-1)
+	pcap = pcap or m.P""
+	labels[lab] = { id = nlabels, msg = msg, psync = psync, pcap = pcap }
 end
+
+newError("ExpTermFirst", "expected an expression", op + ")", m.Cc(1000)) 
+newError("ExpTermOp", "expected a term after the operator", op + ")", m.Cc(1000))
+newError("MisClose",  "missing a closing ')' after the expression",  m.P")")
+newError("Extra", "extra characters found after the expression") 
 
 local errors, subject
 
 local function expect(patt, labname)
-  local i = labelindex(labname)
+  local i = labels[labname].id
   return patt + m.T(i)
 end
-
-
-local num = m.R("09")^1 / tonumber
-local op = m.S("+-")
 
 local function compute(tokens)
   local result = tokens[1]
@@ -52,11 +51,11 @@ local g = m.P {
 
 function recorderror(pos, lab)
 	local line, col = re.calcline(subject, pos)
-	table.insert(errors, { line = line, col = col, msg = labels[lab][2] })
+	table.insert(errors, { line = line, col = col, msg = labels[lab].msg })
 end
 
 function record (labname)
-	return (m.Cp() * m.Cc(labelindex(labname))) / recorderror
+	return (m.Cp() * m.Cc(labname)) / recorderror
 end
 
 function sync (p)
@@ -67,16 +66,11 @@ function defaultValue (p)
 	return p or m.Cc(1000) 
 end
 
-local grec = m.P {
-	"S",
-	S = m.Rec(m.V"A", m.V"ErrExpTermFirst", labelindex("ExpTermFirst")), -- default value is 0
-	A = m.Rec(m.V"Sg", m.V"ErrExpTermOp", labelindex("ExpTermOp")),
-	Sg = m.Rec(g, m.V"ErrMisClose", labelindex("MisClose")),
-	ErrExpTermFirst = record("ExpTermFirst") * sync(op + ")") * defaultValue(),
-	ErrExpTermOp = record("ExpTermOp") * sync(op + ")") * defaultValue(),
-	ErrMisClose = record("MisClose") * sync(m.P")") * defaultValue(m.P""),
-}
-               
+local grec = g * expect(m.P(-1), "Extra")
+for k, v in pairs(labels) do
+	grec = m.Rec(grec, record(k) * sync(v.psync) * v.pcap, v.id)
+end
+
 local function eval(input)
 	errors = {}
 	io.write("Input: ", input, "\n")
@@ -97,7 +91,7 @@ local function eval(input)
 end
 
 print(eval "90-70-(5)+3")
---> 20
+--> 18
 
 print(eval "15+")
 --> 2 + 0
@@ -109,7 +103,7 @@ print(eval "1+3+-9")
 --> 1 + 3 + [0] - 9
 
 print(eval "1+()3+")
---> 1 + ([0]) [3 +] [0]
+--> 1 + ([0]) [+] 3 + [0]
 
 print(eval "8-(2+)-5")
 --> 8 - (2 + [0]) - 5 
@@ -124,5 +118,5 @@ print(eval "1+(")
 
 print(eval "3)")
 
-print(eval "11+())3")
-
+print(eval "11+()3")
+--> 1 + ([0]) [+] 3 + [0]

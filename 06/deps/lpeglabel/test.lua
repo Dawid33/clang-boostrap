@@ -12,7 +12,7 @@ local a, b, c, d, e, f, g, p, t
 
 
 -- compatibility with Lua 5.2
-local unpack = rawget(table, "unpack") or unpack
+local unpack = rawget(table, "unpack") 
 local loadstring = rawget(_G, "loadstring") or load
 
 

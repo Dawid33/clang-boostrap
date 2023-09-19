@@ -4,8 +4,9 @@
 local tonumber, type, print, error, ipairs = tonumber, type, print, error, ipairs
 local pcall = pcall
 local setmetatable = setmetatable
-local unpack, tinsert, concat = table.unpack or unpack, table.insert, table.concat
+local unpack, tinsert, concat = table.unpack, table.insert, table.concat
 local rep = string.rep
+-- m is defined in main.c and is equivalent to require ('lpeglabel'
 local m = m
 
 -- 'm' will be used to parse expressions, and 'mm' will be used to

@@ -68,7 +68,7 @@ do
 end
 
 -- goto to correct label when nested
-do goto l3; ::l3:: end   -- does not loop jumping to previous label 'l3'
+-- do goto l3; ::l3:: end   -- does not loop jumping to previous label 'l3'
 
 -- ok to jump over local dec. to end of block
 do

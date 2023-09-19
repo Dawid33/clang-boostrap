@@ -1,4 +1,4 @@
-local peg = require "peg-parser"
+local peg = require("peg-parser")
 local f = peg.pegToAST
 
 local eq = require "equals"

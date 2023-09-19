@@ -22,21 +22,21 @@ CWARNS = -Wall -Wextra -pedantic \
 # -Wunreachable-code \
 
 
-CFLAGS = $(CWARNS) -nostdinc -B ../../05/tcc-bootstrap -I ../../05/musl-bootstrap/include -I$(LUADIR)
-CC = ../../05/tcc-0.9.27/tcc
+CFLAGS = $(CWARNS) -nostdinc -B ../../../05/tcc-bootstrap -I ../../../05/musl-bootstrap/include -I$(LUADIR)
+CC = ../../../05/tcc-0.9.27/tcc
 
 FILES = lpvm.o lpcap.o lptree.o lpcode.o lpprint.o
 
 # For Linux
 linux:
-	make lpeglabel.so "DLLFLAGS = -shared -nostdlib -B ../../05/tcc-bootstrap "
+	make lpeglabel.a 
 
 # # For Mac OS
 # macosx:
 # 	make lpeglabel.so "DLLFLAGS = -bundle -undefined dynamic_lookup"
 
-lpeglabel.so: $(FILES)
-	$(CC) $(DLLFLAGS) $(FILES) -o lpeglabel.so ../lua-bootstrap/lib/liblua.a ../../05/musl-bootstrap/lib/libc.a
+lpeglabel.a: $(FILES)
+	$(CC) -ar c lpeglabel.a $(FILES) 
 
 $(FILES): makefile
 

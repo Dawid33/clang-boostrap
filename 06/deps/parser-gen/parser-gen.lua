@@ -1,21 +1,17 @@
-local peg = require "parser-gen.peg-parser"
-local eg = require "parser-gen.errorgen"
-local s = require "parser-gen.stack"
+local f = (...):match("(.-)[^%.]+$")
+local peg = require(f .. "peg-parser")
+local eg = require(f .. "errorgen")
+local s = require(f .. "stack")
 
--- create stack for tokens inside captures. nil - not inside capture, 0 - inside capture, 1 - token found inside capture
+-- Create stack for tokens inside captures. 
+-- nil - not inside capture, 
+-- 0   - inside capture,
+-- 1   - token found inside capture
 local tokenstack = s.Stack:Create()
-
-
-
 local subject, errors, errorfunc
-
--- Lua 5.1 compatibility:
-local unpack = unpack or table.unpack
-
+local unpack = table.unpack;
 
 local Predef = { nl = m.P"\n", cr = m.P"\r", tab = m.P"\t" }
-
-
 local mem = {} -- for compiled grammars
 
 local function updatelocale()
@@ -559,7 +555,8 @@ end
 
 
 
-
+-- could be wrong
+local follow = eg.follow
 
 local pg = {compile=compile, setlabels=setlabels, parse=parse,follow=follow, calcline = peg.calcline, usenodes = usenodes}
 

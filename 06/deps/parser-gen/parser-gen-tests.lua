@@ -1,14 +1,5 @@
-local pg = require "parser-gen"
-local peg = require "peg-parser"
-local re = require "relabel"
-
-local eq = require "equals"
-
-local equals = eq.equals
-
-
-local pr = peg.print_r
-
+local pg = require("parser-gen")
+local equals = require("equals").equals
 
 -- terminals
 -- space allowed
@@ -141,20 +132,18 @@ assert(errs[1]["msg"] == "Expected C")
 
 
 -- SELF-DESCRIPTION
-pg.setlabels(peg.labels)
-gram = pg.compile(peg.gram, peg.defs,_,true)
-res1, errs = pg.parse(peg.gram,gram)
+pg.setlabels(pg.labels)
+gram = pg.compile(pg.gram, pg.defs,_,true)
+res1, errs = pg.parse(pg.gram,gram)
 assert(res1) -- parse succesful
 
 --[[ this test is invalid since tool added ^LABEL syntax
-r = re.compile(peg.gram,peg.defs)
-res2 = r:match(peg.gram)
+r = re.compile(pg.gram,pg.defs)
+res2 = r:match(pg.gram)
 
---peg.print_r(res2)
+--pg.print_r(res2)
 
 assert(equals(res1, res2))
 ]]--
-
-
 
 print("all tests succesful")

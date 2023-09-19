@@ -1,23 +1,26 @@
 CC= ../05/tcc-0.9.27/tcc
 TCCINST= ../05/tcc-bootstrap
 MUSLINST= ../05/musl-bootstrap
-LUAINST= lua-bootstrap
+LUAINST= deps/lua-bootstrap
 
-CFLAGS= -I $(MUSLINST)/include -I $(LUAINST)/include -I lpeglabel
+CFLAGS= -I $(MUSLINST)/include -I $(LUAINST)/include -I deps/lpeglabel
 SRCS = $(sort $(wildcard **/*.c))
 OBJS = $(SRCS:.c=.o) 
 
 all: zsh
 
-lua-bootstrap/lib/liblua.a:
-	$(MAKE) -j8 -C lua-5.4.6 
-	$(MAKE) -C lua-5.4.6 install
+deps/lua-bootstrap/lib/liblua.a:
+	$(MAKE) -j8 -C deps/lua-5.4.6 
+	$(MAKE) -C deps/lua-5.4.6 install
 
-%.o: %.c lua-bootstrap/lib/liblua.a
+deps/lpeglabel/lpeglabel.a: deps/lua-bootstrap/lib/liblua.a
+	$(MAKE) -C deps/lpeglabel
+
+%.o: %.c deps/lua-bootstrap/lib/liblua.a
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-zsh: $(OBJS) lua-bootstrap/lib/liblua.a
-	$(CC) -nostdlib -B $(TCCINST) -o zsh $(OBJS) $(LUAINST)/lib/liblua.a $(MUSLINST)/lib/*.[oa] 
+zsh: $(OBJS) deps/lua-bootstrap/lib/liblua.a deps/lpeglabel/lpeglabel.a
+	$(CC) -nostdlib -B $(TCCINST) -o zsh $(OBJS) deps/lpeglabel/lpeglabel.a $(LUAINST)/lib/liblua.a $(MUSLINST)/lib/*.[oa] 
 
 run: zsh
 	./zsh	
@@ -25,9 +28,10 @@ run: zsh
 c:
 	rm -f zsh
 	rm -f src/*.o
-	rm -f lpeglabel/*.o
+	rm -f deps/lpeglabel/*.o
 
 clean: c
-	rm -rf lua-bootstrap
-	$(MAKE) -C lua-5.4.6 clean
+	rm -rf deps/lua-bootstrap
+	$(MAKE) -C deps/lua-5.4.6 clean
+	$(MAKE) -C deps/lpeglabel clean
 

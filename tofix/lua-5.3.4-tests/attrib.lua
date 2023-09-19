@@ -1,3 +1,4 @@
+---@diagnostic disable: unbalanced-assignments
 -- $Id: attrib.lua,v 1.65 2016/11/07 13:11:28 roberto Exp $
 -- See Copyright Notice in file all.lua
 
