@@ -1,4 +1,4 @@
-all: README.html out00
+all: out00
 out00: in00
 	./hexcompile
 %.html: %.md ../markdown

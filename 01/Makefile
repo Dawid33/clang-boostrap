@@ -1,9 +1,7 @@
-all: out01 README.html
+all: out01
 out01: in01 out00
 	./out00
 out00: in00
 	../00/hexcompile
-%.html: %.md ../markdown
-	../markdown $<
 clean:
-	rm -f out00 out01 README.html
+	rm -f out00 out01 

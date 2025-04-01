@@ -47,4 +47,4 @@ $(TCC)1a: $(TCCDIR)/*.c $(TCCDIR)/*.h
 clean:
 	rm -rf musl-bootstrap
 	rm -rf tcc-bootstrap
-	rm -f out* README.html *.out *.o $(TCCDIR)/tcc[0123456] $(TCCDIR)/tcc[0123456]a $(TCCDIR)/lib/*.[oa]
+	rm -f out* *.out *.o $(TCCDIR)/tcc[0123456] $(TCCDIR)/tcc[0123456]a $(TCCDIR)/lib/*.[oa]

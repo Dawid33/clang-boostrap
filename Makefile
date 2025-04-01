@@ -1,4 +1,4 @@
-all: markdown README.html
+all: 
 	$(MAKE) -C 00
 	$(MAKE) -C 01
 	$(MAKE) -C 02
@@ -8,6 +8,8 @@ all: markdown README.html
 	# don't compile all of 05 because it takes a while
 	$(MAKE) -C 05
 	$(MAKE) -C 05 tcc
+	$(MAKE) -C 05 tcc-files
+	$(MAKE) -C 05 musl
 	$(MAKE) -C 06 
 clean:
 	$(MAKE) -C 00 clean
@@ -20,7 +22,3 @@ clean:
 	$(MAKE) -C 06 clean
 	rm -f markdown
 	rm -f README.html
-markdown: markdown.c
-	$(CC) -O2 -o markdown -Wall -Wconversion -Wshadow -std=c89 markdown.c
-README.html: markdown README.md
-	./markdown README.md
