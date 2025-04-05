@@ -22,6 +22,7 @@ $(TCCDIR)/lib/libtcc1.a: $(TCC0) $(TCCDIR)/lib/*.[cS]
 	$(TCC0) -c $(TCCDIR)/lib/libtcc1.c -o $(TCCDIR)/lib/libtcc1.o
 	$(TCC0) -ar $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/lib/*.o
 musl: tcc-files
+	mkdir -p musl-boostrap
 	$(MAKE) -j8 -C musl-0.6.0
 	$(MAKE) -C musl-0.6.0 install
 tcc-files: $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/include/*.h
