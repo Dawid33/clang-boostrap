@@ -1,5 +1,7 @@
-extern unsigned long __syscall(int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long);
+#include <stdlib.h>
+#include <stdio.h>
+
 int main(void) {
-	__syscall(1, 1, (unsigned long)"Hello, world!\n", 14, 0, 0, 0);
-	return 42;
+	putc('a', stdout);
+	return 0;
 }

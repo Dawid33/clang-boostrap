@@ -2,7 +2,7 @@ TCCDIR=tcc-0.9.27
 TCC=$(TCCDIR)/tcc
 TCC0=$(TCC)0
 TCCINST=tcc-bootstrap
-all: out04 a.out $(TCCDIR)/lib/libtcc1.a
+all: testapp
 in04: *.b ../04a/out04
 	../04a/out04 main.b in04
 out04: in04 ../04/out03
@@ -13,12 +13,6 @@ out04: in04 ../04/out03
 	./out04 $< $@
 a.out: main.c *.h out04
 	./out04
-test.out: test.s.o test.c.o
-	$(TCC0) -static -nostdlib test.s.o test.c.o -o test.out
-test.s.o: $(TCC0) test.s
-	$(TCC0) -static -nostdlib -c test.s -o test.s.o
-test.c.o: $(TCC0) test.c
-	$(TCC0) -static -nostdlib -c test.c -o test.c.o
 $(TCC0): $(TCCDIR)/*.c $(TCCDIR)/*.h out04
 	cd $(TCCDIR) && ../out04 tcc.c tcc0
 $(TCCDIR)/lib/libtcc1.a: $(TCC0) $(TCCDIR)/lib/*.[cS]
@@ -37,6 +31,11 @@ tcc-files: $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/include/*.h
 $(TCC): $(TCC0) musl
 	cd $(TCCDIR) && ./tcc0 -nostdinc -nostdlib -B ../tcc-boostrap -I ../musl-bootstrap/include tcc.c ../musl-bootstrap/lib/*.[oa] -o tcc
 tcc: $(TCC)
+musl-final: tcc
+	$(MAKE) -j8 -C musl-final
+	$(MAKE) -C musl-final install
+testapp: tcc musl-final
+	$(TCC) -Wall -g -static -nostdinc -nostdlib -I musl-final/include test.c musl-final/lib/*.[oa] -MD -o test
 
 $(TCC)2: $(TCC)1
 	cd $(TCCDIR) && ./tcc1 tcc.c -o tcc2
@@ -45,6 +44,9 @@ $(TCC)0a: $(TCCDIR)/*.c $(TCCDIR)/*.h
 $(TCC)1a: $(TCCDIR)/*.c $(TCCDIR)/*.h
 	cd $(TCCDIR) && ./tcc0a tcc.c -o tcc1a
 clean:
+	$(MAKE) -C musl-final clean
+	$(MAKE) -C musl-0.6.0 clean
 	rm -rf musl-bootstrap
+	rm -rf musl-bootstrap-final
 	rm -rf tcc-bootstrap
 	rm -f out* *.out *.o $(TCCDIR)/tcc[0123456] $(TCCDIR)/tcc[0123456]a $(TCCDIR)/lib/*.[oa]

@@ -12,13 +12,13 @@ raw = f:read("*all")
 f:close()
 
 local errors = 0
-local function printerror(desc,line,col,sfail,trec)
+local function printerror(desc, line, col, sfail, trec)
 	errors = errors+1
 	print("Error #"..errors..": "..desc.." on line "..line.."(col "..col..")")
 end
 
-local result, errors = pg.parse(raw, grammar, printerror)
+local result, _ = pg.parse(raw, grammar, printerror)
 
-my_ast = ast.parse_tree_to_ast(result)
-ast.print(my_ast)
+print(util.dump(result))
+local my_ast = ast.parse_tree_to_ast(result)
 

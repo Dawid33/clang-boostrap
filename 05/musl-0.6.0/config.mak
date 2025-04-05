@@ -14,7 +14,7 @@ exec_prefix = ../musl-bootstrap
 # Uncomment if you want to build i386 musl on a 64-bit host
 #CFLAGS += -m32
 
-#CFLAGS += -g
+CFLAGS += -g
 
 # Uncomment for smaller code size.
 #CFLAGS += -fomit-frame-pointer -mno-accumulate-outgoing-args

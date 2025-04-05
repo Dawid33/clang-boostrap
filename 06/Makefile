@@ -7,23 +7,30 @@ CFLAGS= -I $(MUSLINST)/include -I $(LUAINST)/include -I deps/lpeglabel
 SRCS = $(sort $(wildcard **/*.c))
 OBJS = $(SRCS:.c=.o) 
 
-all: zsh
+all: test.out #zsh
 
-deps/lua-bootstrap/lib/liblua.a:
-	$(MAKE) -j8 -C deps/lua-5.4.6 
-	$(MAKE) -C deps/lua-5.4.6 install
+test.out: test.s.o test.c.o
+	$(TCC) -static -nostdlib -B ../tcc-boostrap  -I ../musl-bootstrap/include ../musl-bootstrap/lib/*.[oa] test.s.o test.c.o -o test.out
+test.s.o: $(TCC0) test.s
+	$(TCC) -static -nostdlib -B ../tcc-boostrap  -I ../musl-bootstrap/include ../musl-bootstrap/lib/*.[oa] -c test.s -o test.s.o
+test.c.o: $(TCC0) test.c
+	$(TCC) -static -nostdlib -B ../tcc-boostrap -I ../musl-bootstrap/include ../musl-bootstrap/lib/*.[oa] -c test.c -o test.c.o
 
-deps/lpeglabel/lpeglabel.a: deps/lua-bootstrap/lib/liblua.a
-	$(MAKE) -C deps/lpeglabel
+# deps/lua-bootstrap/lib/liblua.a:
+# 	$(MAKE) -j8 -C deps/lua-5.4.6 
+# 	$(MAKE) -C deps/lua-5.4.6 install
 
-%.o: %.c deps/lua-bootstrap/lib/liblua.a
-	$(CC) $(CFLAGS) -c -o $@ $<
+# deps/lpeglabel/lpeglabel.a: deps/lua-bootstrap/lib/liblua.a
+# 	$(MAKE) -C deps/lpeglabel
 
-zsh: $(OBJS) deps/lua-bootstrap/lib/liblua.a deps/lpeglabel/lpeglabel.a
-	$(CC) -nostdlib -B $(TCCINST) -o zsh $(OBJS) deps/lpeglabel/lpeglabel.a $(LUAINST)/lib/liblua.a $(MUSLINST)/lib/*.[oa] 
+# %.o: %.c deps/lua-bootstrap/lib/liblua.a
+# 	$(CC) $(CFLAGS) -c -o $@ $<
 
-run: zsh
-	./zsh	
+# zsh: $(OBJS) deps/lua-bootstrap/lib/liblua.a deps/lpeglabel/lpeglabel.a
+# 	$(CC) -nostdlib -B $(TCCINST) -o zsh $(OBJS) deps/lpeglabel/lpeglabel.a $(LUAINST)/lib/liblua.a $(MUSLINST)/lib/*.[oa] 
+
+# run: zsh
+# 	./zsh	
 
 c:
 	rm -f zsh

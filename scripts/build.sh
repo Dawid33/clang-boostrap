@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./bootstrap.sh
+cd 06; make | less -R +F 
