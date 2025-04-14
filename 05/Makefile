@@ -22,7 +22,9 @@ $(TCCDIR)/lib/libtcc1.a: $(TCC0) $(TCCDIR)/lib/*.[cS]
 	$(TCC0) -c $(TCCDIR)/lib/libtcc1.c -o $(TCCDIR)/lib/libtcc1.o
 	$(TCC0) -ar $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/lib/*.o
 musl: tcc-files
-	mkdir -p musl-boostrap
+	mkdir -p musl-boostrap/include
+	mkdir -p musl-boostrap/bin
+	mkdir -p musl-boostrap/lib
 	$(MAKE) -j8 -C musl-0.6.0
 	$(MAKE) -C musl-0.6.0 install
 tcc-files: $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/include/*.h
@@ -33,6 +35,9 @@ $(TCC): $(TCC0) musl
 	cd $(TCCDIR) && ./tcc0 -nostdinc -nostdlib -B ../tcc-boostrap -I ../musl-bootstrap/include tcc.c ../musl-bootstrap/lib/*.[oa] -o tcc
 tcc: $(TCC)
 musl-final: tcc
+	mkdir -p musl-boostrap-final/include
+	mkdir -p musl-boostrap-final/bin
+	mkdir -p musl-boostrap-final/lib
 	$(MAKE) -j8 -C musl-final
 	$(MAKE) -C musl-final install
 testapp: tcc musl-final

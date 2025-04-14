@@ -2,6 +2,6 @@
 #include <stdio.h>
 
 int main(void) {
-	putc('a', stdout);
+	printf("Hello, World!\n");
 	return 0;
 }

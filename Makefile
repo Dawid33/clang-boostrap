@@ -10,7 +10,6 @@ all:
 	$(MAKE) -C 05 tcc
 	$(MAKE) -C 05 tcc-files
 	$(MAKE) -C 05 musl
-	$(MAKE) -C 06 
 clean:
 	$(MAKE) -C 00 clean
 	$(MAKE) -C 01 clean
@@ -19,6 +18,5 @@ clean:
 	$(MAKE) -C 04 clean
 	$(MAKE) -C 04a clean
 	$(MAKE) -C 05 clean
-	$(MAKE) -C 06 clean
 	rm -f markdown
 	rm -f README.html
