@@ -3,11 +3,8 @@
 02/*
 03/*
 04/*
-05/*
-tofix
 04a
-06/deps/*
-06/zig
-06/exercises
-*.dot
+# 05/musl*
+05/tcc-0*
+05/musl-0*
 

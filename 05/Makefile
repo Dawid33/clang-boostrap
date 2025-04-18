@@ -22,9 +22,9 @@ $(TCCDIR)/lib/libtcc1.a: $(TCC0) $(TCCDIR)/lib/*.[cS]
 	$(TCC0) -c $(TCCDIR)/lib/libtcc1.c -o $(TCCDIR)/lib/libtcc1.o
 	$(TCC0) -ar $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/lib/*.o
 musl: tcc-files
-	mkdir -p musl-boostrap/include
-	mkdir -p musl-boostrap/bin
-	mkdir -p musl-boostrap/lib
+	mkdir -p musl-bootstrap/include
+	mkdir -p musl-bootstrap/bin
+	mkdir -p musl-bootstrap/lib
 	$(MAKE) -j8 -C musl-0.6.0
 	$(MAKE) -C musl-0.6.0 install
 tcc-files: $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/include/*.h
@@ -32,16 +32,17 @@ tcc-files: $(TCCDIR)/lib/libtcc1.a $(TCCDIR)/include/*.h
 	cp -r $(TCCDIR)/include/*.h $(TCCINST)/include/
 	cp -r $(TCCDIR)/lib/libtcc1.a $(TCCINST)/
 $(TCC): $(TCC0) musl
-	cd $(TCCDIR) && ./tcc0 -nostdinc -nostdlib -B ../tcc-boostrap -I ../musl-bootstrap/include tcc.c ../musl-bootstrap/lib/*.[oa] -o tcc
+	cd $(TCCDIR) && ./tcc0 -nostdinc -nostdlib -B ../tcc-bootstrap -I ../musl-bootstrap/include tcc.c ../musl-bootstrap/lib/*.[oa] -o tcc
 tcc: $(TCC)
 musl-final: tcc
-	mkdir -p musl-boostrap-final/include
-	mkdir -p musl-boostrap-final/bin
-	mkdir -p musl-boostrap-final/lib
-	$(MAKE) -j8 -C musl-final
-	$(MAKE) -C musl-final install
+	mkdir -p musl-bootstrap-final/include
+	mkdir -p musl-bootstrap-final/bin
+	mkdir -p musl-bootstrap-final/lib
+	$(MAKE) -C musl-final
+tcc-final: tcc musl-final
+	cd tcc-final && ../$(TCCDIR)/tcc -Wall -g -static -nostdinc -nostdlib -B ../tcc-bootstrap -I ../musl-final/include tcc.c ../musl-final/lib/*.[oa] -o tcc
 testapp: tcc musl-final
-	$(TCC) -Wall -g -static -nostdinc -nostdlib -I musl-final/include test.c musl-final/lib/*.[oa] -MD -o test
+	./tcc-final/tcc -Wall -g -static -nostdinc -nostdlib -I ./tcc-final/include -I ./musl-final/include test.c ./musl-final/lib/*.[oa] -o test
 
 $(TCC)2: $(TCC)1
 	cd $(TCCDIR) && ./tcc1 tcc.c -o tcc2
