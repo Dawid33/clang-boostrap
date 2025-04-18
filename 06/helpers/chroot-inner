@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Run a command chrooted inside $DESTDIR w/o network, with /dev/null, outline:
+#
+#     [helpers/chroot, outer script]
+#     unshare
+#       -n                                            # without network
+#       -r                                            # with EUID=EGID=0
+#       -m                                            # separate mount namespace
+#         [helpers/chroot-inner, this script]
+#  /      mount --bind /dev/null $DESTDIR/dev/null    # unprivileged /dev/null!
+# |       &&
+# |       env -i                                      # with env unset
+#  \        chroot $DESTDIR                           # unprivileged chroot!
+
+set -uex
+
+: ${DESTDIR:=stage}
+: ${NPROC:=1}
+: ${SOURCE_DATE_EPOCH:=0}
+
+CHROOT=$(command -v chroot)
+if [[ ! -x "$CHROOT" ]]; then
+	if [[ -x /sbin/chroot ]]; then
+		CHROOT=/sbin/chroot
+	elif [[ -x /usr/sbin/chroot ]]; then
+		CHROOT=/usr/sbin/chroot
+	fi
+fi
+
+if [[ -e /run/wrappers/bin/mount.real ]]; then
+	MOUNT=$(cat /run/wrappers/bin/mount.real)
+else
+	MOUNT=mount
+fi
+mkdir -p "$DESTDIR/dev"; :> "$DESTDIR/dev/null"
+$MOUNT --bind /dev/null "$DESTDIR/dev/null"
+
+exec env -i "NPROC=$NPROC" "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" \
+	$CHROOT "$DESTDIR" "$@"

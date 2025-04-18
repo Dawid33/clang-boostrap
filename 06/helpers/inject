@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -uex
+
+DESTDIR=$1
+shift
+
+for arg; do
+	if [[ "$arg" =~ .*\.pkg ]]; then
+		# That one's for package dependencies
+		tar -xf "$arg" -Izstd -C "$DESTDIR"
+	else
+		# That one's for copying over downloads and sources
+		if [[ ! -e "./$DESTDIR/$arg" || "$arg" -nt "./$DESTDIR/$arg" ]]
+		then
+			echo "Copying $arg into $DESTDIR..."
+			mkdir -p "$DESTDIR/$(dirname "$arg")"
+			cp -a --reflink=auto "$arg" "$DESTDIR/$arg"
+		fi
+	fi
+done
